@@ -1,0 +1,15 @@
+## How to install database ?
+
+Copy the 'ecus' directory from your DDT2000 database to the root of the sources tree and launch ddt4all.py, you are now ready to use it
+
+## How to compress XML files ?
+
+### From a terminal :
+
+* `python parameters.py --zipconvert`
+* remove 'ecus' directory
+
+### From the application :
+
+* Go to menu 'File' > 'Zip database'
+* remove 'ecus' directory
