@@ -1,0 +1,11 @@
+*.pyc
+*.mo
+*.log
+*.pot
+*.spec
+*.tle
+.coverage
+htmlcov/*
+venv*
+dist/*
+build/*
