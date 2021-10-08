@@ -5,7 +5,7 @@ import serial
 class Device:
     """Elm327 device."""
 
-    timeout = 1
+    timeout = 2
 
     @classmethod
     def at_port(cls, port_name, boud):

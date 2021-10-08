@@ -23,7 +23,7 @@ def main(_argv, _options):
             break
 
     if not device:
-        print("No ELM divice found.")
+        print("No ELM device found.")
         return 1
 
     print("Using {}".format(device))
