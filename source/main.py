@@ -1,7 +1,7 @@
 """Main module."""
 import sys
 
-import serial
+from serial.tools.list_ports import comports
 from cli_options import PARSER
 from elm import Device
 
@@ -15,25 +15,9 @@ def main(_argv, _options):
     # PARSER.print_usage()
 
     print("Scanning for serial ports...")
-    ports = []
-    for i in range(15):
-        port_name = "COM{}".format(i + 1)
-        try:
-            # https://pythonhosted.org/pyserial/
-            ports.append(serial.Serial(port=port_name).port)
-        except serial.SerialException:
-            pass
-        except (ValueError, KeyError) as exc:
-            print("Wrong port settings:", port_name, str(exc))
-
-    if not ports:
-        print("Com port not found.")
-        return 1
-
-    print("Found:", ports)
     device = None
-    for port in ports:
-        print("Try {}...".format(port))
+    for port, desc, _hwid in comports():
+        print("Try {} {}...".format(port, desc))
         device = Device.at_port(port, 38400)
         if device:
             break

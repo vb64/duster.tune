@@ -62,9 +62,6 @@ class Port:
 
     def set_out(self, byte_list, is_constantly=False):
         """Set content for out_buffer."""
-        from source.anten import crc
-
-        byte_list.append(crc(byte_list))
         try:
             data = bytearray(byte_list)
         except ValueError as wrong_bytes:
