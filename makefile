@@ -19,6 +19,9 @@ PYTEST = $(PTEST) --cov=$(SOURCE) --cov=$(TESTS)/mock --cov-report term:skip-cov
 PIP = $(PYTHON) -m pip install
 LINT = $(PYTHON) -m pylint --load-plugins=pylint.extensions.mccabe --max-complexity=10
 
+run:
+	$(PYTHON) $(SOURCE)/main.py
+
 test:
 	$(PTEST) -s $(TESTS)/test/$(T)
 
