@@ -5,6 +5,8 @@ import serial
 class Port:
     """Mocked serial port."""
 
+    valid_names = ["COM1"]
+
     allowed_bytesize = [
       serial.FIVEBITS,
       serial.SIXBITS,
@@ -22,6 +24,9 @@ class Port:
       timeout=None
     ):
         """Open serial port."""
+        if port not in self.valid_names:
+            raise serial.SerialException("Wrong port")
+
         self.port = port
         self.baudrate = baudrate
         self.bytesize = bytesize
@@ -31,9 +36,6 @@ class Port:
 
         if self.bytesize not in self.allowed_bytesize:
             raise ValueError("Wrong bytesize")
-
-        if not self.port.startswith("COM"):
-            raise serial.SerialException("Wrong port")
 
         self.is_opened = True
         self.in_buffer = []

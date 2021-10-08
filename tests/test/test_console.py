@@ -8,8 +8,8 @@ from . import TestBase
 class TestConsole(TestBase):
     """Tests console client."""
 
-    def test_empty_cli(self):
-        """Call app with empty CLI."""
+    def test_no_elm(self):
+        """Call app without ELM device."""
         from source.main import main
 
-        assert main([], self.options) == 0
+        assert main([], self.options) == 1
