@@ -14,6 +14,7 @@ class Port:
       serial.EIGHTBITS,
     ]
 
+    # https://pythonhosted.org/pyserial/pyserial_api.html
     def __init__(
       self,
       port="COM1",
@@ -21,6 +22,7 @@ class Port:
       bytesize=serial.EIGHTBITS,
       parity=serial.PARITY_NONE,
       stopbits=serial.STOPBITS_ONE,
+      write_timeout=None,
       timeout=None
     ):
         """Open serial port."""
@@ -33,6 +35,7 @@ class Port:
         self.parity = parity
         self.stopbits = stopbits
         self.timeout = timeout
+        self.write_timeout = write_timeout
 
         if self.bytesize not in self.allowed_bytesize:
             raise ValueError("Wrong bytesize")

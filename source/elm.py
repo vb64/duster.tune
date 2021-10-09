@@ -5,20 +5,28 @@ import serial
 class Device:
     """Elm327 device."""
 
-    timeout = 2
+    r_timeout = 2
+    w_timeout = 1
 
     @classmethod
     def at_port(cls, port_name, boud):
         """Return device instance at the given port or None if not found."""
+        print("# opening port...")
         try:
-            port = serial.Serial(port_name, baudrate=boud, timeout=cls.timeout)
+            port = serial.Serial(port_name, baudrate=boud, timeout=cls.r_timeout, write_timeout=cls.w_timeout)
         except serial.serialutil.SerialException:
             return None
         except ValueError:
             return None
 
-        port.write(bytearray("ATZ\r", 'utf-8'))
-        print("# read with timeout: {}".format(cls.timeout))
+        print("# write command...")
+
+        try:
+            port.write(bytearray("ATZ\r", 'utf-8'))
+        except serial.serialutil.SerialTimeoutException:
+            return None
+
+        print("# read with timeout: {}".format(cls.r_timeout))
         response = port.read(100).decode("utf-8")
         print("# {} response: '{}'".format(port_name, response))
 
