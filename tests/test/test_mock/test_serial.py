@@ -9,6 +9,15 @@ from . import TestMock
 class TestSerial(TestMock):
     """Tests mock serial module."""
 
+    @staticmethod
+    def test_bytesize():
+        """Wrong bytesize."""
+        from tests.mock import serial as MockSerial
+
+        with pytest.raises(ValueError) as err:
+            MockSerial.Port(bytesize=666)
+        assert 'Wrong bytesize' in str(err.value)
+
     def test_close(self):
         """Method close."""
         self.port.close()
