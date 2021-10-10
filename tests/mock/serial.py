@@ -76,3 +76,19 @@ class Port:
             self.out_buffer.append(data)
 
         self.is_constantly = is_constantly
+
+
+class MockNotWriteble(Port):
+    """Mocked not writeble serial port."""
+
+    def write(self, _bytes_array):
+        """No write."""
+        raise serial.serialutil.SerialTimeoutException(self.port)
+
+
+class MockElm(Port):
+    """Mocked serial port with ELM device."""
+
+    def read(self, _bytes_num):
+        """Read given bytes number from serial port."""
+        return b'ATZ\r\r\rELM327 v1.5\r\r'

@@ -2,25 +2,7 @@
 
 make test T=test_elm.py
 """
-import serial
-from tests.mock.serial import Port
 from . import TestBase
-
-
-class MockNotWriteble(Port):
-    """Mocked not writeble serial port."""
-
-    def write(self, _bytes_array):
-        """No write."""
-        raise serial.serialutil.SerialTimeoutException(self.port)
-
-
-class MockElm(Port):
-    """Mocked serial port with ELM device."""
-
-    def read(self, _bytes_num):
-        """Read given bytes number from serial port."""
-        return b'ATZ\r\r\rELM327 v1.5\r\r'
 
 
 class TestElm(TestBase):
@@ -46,6 +28,7 @@ class TestElm(TestBase):
     def test_at_port_wrong():
         """Class method at_port."""
         from source.elm import Device, serial as mockserial
+        from tests.mock.serial import MockNotWriteble, MockElm
 
         saved = mockserial.Serial
         mockserial.Serial = MockNotWriteble
