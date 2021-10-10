@@ -6,7 +6,7 @@ class Device:
     """Elm327 device."""
 
     r_timeout = 2
-    w_timeout = 1
+    w_timeout = 2
 
     @classmethod
     def at_port(cls, port_name, boud):
@@ -27,11 +27,13 @@ class Device:
             return None
 
         print("# read with timeout: {}".format(cls.r_timeout))
-        response = port.read(100).decode("utf-8")
+        response = port.read(100)  # .decode("utf-8")
         print("# {} response: '{}'".format(port_name, response))
-
-        if 'ELM' in response:
-            return cls(port, response)
+        # b'ATZ\r\r\rELM327 v1.5\r\r'
+        if b'ELM327' in response:
+            print("# ELM372 found.")
+            text = response.replace(b'\r', b'\n')
+            return cls(port, text.decode('ascii'))
 
         return None
 
