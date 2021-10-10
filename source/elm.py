@@ -1,6 +1,18 @@
 """Elm327 device interface."""
 import serial
 
+ELM_SIGN = 'ELM327'
+
+
+def name_from_response(response_bytes):
+    """Construct Elm327 device name from port response."""
+    # b'ATZ\r\r\rELM327 v1.5\r\r'
+    text = response_bytes.replace(b'\r', b'\n').decode('ascii')
+    if ELM_SIGN not in text:
+        return ""
+
+    return text[text.index(ELM_SIGN):].split('\n')[0]
+
 
 class Device:
     """Elm327 device."""
@@ -11,29 +23,20 @@ class Device:
     @classmethod
     def at_port(cls, port_name, boud):
         """Return device instance at the given port or None if not found."""
-        print("# opening port...")
-        try:
-            port = serial.Serial(port_name, baudrate=boud, timeout=cls.r_timeout, write_timeout=cls.w_timeout)
-        except serial.serialutil.SerialException:
-            return None
-        except ValueError:
-            return None
-
-        print("# write command...")
-
+        port = serial.Serial(
+          port_name, baudrate=boud,
+          timeout=cls.r_timeout, write_timeout=cls.w_timeout
+        )
         try:
             port.write(bytearray("ATZ\r", 'utf-8'))
         except serial.serialutil.SerialTimeoutException:
             return None
 
-        print("# read with timeout: {}".format(cls.r_timeout))
-        response = port.read(100)  # .decode("utf-8")
+        response = port.read(100)
         print("# {} response: '{}'".format(port_name, response))
-        # b'ATZ\r\r\rELM327 v1.5\r\r'
-        if b'ELM327' in response:
-            print("# ELM372 found.")
-            text = response.replace(b'\r', b'\n')
-            return cls(port, text.decode('ascii'))
+        name = name_from_response(response)
+        if name:
+            return cls(port, name)
 
         return None
 

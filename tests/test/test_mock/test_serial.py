@@ -3,11 +3,21 @@
 make test T=test_mock/test_serial.py
 """
 import pytest
+import serial
 from . import TestMock
 
 
 class TestSerial(TestMock):
     """Tests mock serial module."""
+
+    @staticmethod
+    def test_wrong_name():
+        """Wrong port name."""
+        from tests.mock import serial as MockSerial
+
+        with pytest.raises(serial.SerialException) as err:
+            MockSerial.Port(port='XXX')
+        assert 'Wrong port' in str(err.value)
 
     @staticmethod
     def test_bytesize():

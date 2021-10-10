@@ -29,23 +29,3 @@ class TestConsole(TestBase):
         main.comports = stub_com1_bluetooth
         assert main.main([], self.options) == 1
         main.comports = saved
-
-    def test_no_ports(self):
-        """Call app without COM ports."""
-        from source.main import main
-        from ..mock.serial import Port
-
-        saved = Port.valid_names
-        Port.valid_names = []
-        assert main([], self.options) == 1
-        Port.valid_names = saved
-
-    def test_wrong_port_params(self):
-        """Wrong COM port parameters."""
-        from source.main import main
-        from ..mock.serial import Port
-
-        saved = Port.allowed_bytesize
-        Port.allowed_bytesize = []
-        assert main([], self.options) == 1
-        Port.allowed_bytesize = saved

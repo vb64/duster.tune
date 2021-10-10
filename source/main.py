@@ -14,7 +14,7 @@ def main(_argv, _options):
     print("ELM scanner. {}".format(COPYRIGHTS))
     # PARSER.print_usage()
 
-    print("Scanning for serial ports...")
+    print("Searching for ELM device...")
     device = None
     for port, desc, _hwid in comports():
         print("Try {} {}...".format(port, desc))

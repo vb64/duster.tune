@@ -16,14 +16,10 @@ class TestElm(TestBase):
         assert str(device) == 'Elm device'
 
     @staticmethod
-    def test_at_port_none():
-        """Method at_port with wrong params."""
-        from source.elm import Device, serial
-        from tests.mock import serial as MockSerial
+    def test_name_from_response():
+        """Function name_from_response."""
+        from source.elm import name_from_response
 
-        saved = serial.Serial
-        serial.Serial = MockSerial.Port
-
-        assert Device.at_port('XXX', 666) is None
-        assert Device.at_port('COM1', 666) is None
-        serial.Serial = saved
+        assert not name_from_response(b'')
+        assert not name_from_response(b'xxx')
+        assert name_from_response(b'ATZ\r\r\rELM327 v1.5\r\r') == "ELM327 v1.5"
