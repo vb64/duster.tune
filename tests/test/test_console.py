@@ -29,3 +29,15 @@ class TestConsole(TestBase):
         main.comports = stub_com1_bluetooth
         assert main.main([], self.options) == 1
         main.comports = saved
+
+    def test_elm(self):
+        """Call app with ELM device."""
+        from source import main
+        from source.elm import serial as mockserial
+        from tests.mock.serial import MockElm
+
+        saved = mockserial.Serial
+        mockserial.Serial = MockElm
+
+        assert main.main([], self.options) == 0
+        mockserial.Serial = saved
