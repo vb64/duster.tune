@@ -87,7 +87,7 @@ DATA = {
   "x13A": "JUKE",
   "x60A": "NAVARRA ALASKAN",
   "xNN": "KICKS",
-  "P32": "QASHQAI",
+  "p32": "QASHQAI",
 }
 
 # list from github version of ddt4all at 2021

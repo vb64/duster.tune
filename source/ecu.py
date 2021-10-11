@@ -53,10 +53,11 @@ class Ident:
 class Database:
     """Ecu database."""
 
-    def __init__(self, zip_name):
+    def __init__(self, zip_name, vehicles):
         """Database instanse."""
         self.numecu = 0
         self.targets = []
+        self.unknown_vehicles = {}
         self.vehiclemap = {}
         self.available_addr_kwp = []
         self.available_addr_can = []
@@ -96,10 +97,19 @@ class Database:
 
                     self.targets.append(ecu_ident)
 
-            for proj in ecuprojects:
-                if proj not in self.vehiclemap:
-                    self.vehiclemap[proj] = []
-                self.vehiclemap[proj].append((ecuprotocol, ecuaddress))
+            self.add_projects(ecuprojects, vehicles, ecuprotocol, ecuaddress)
+
+    def add_projects(self, projects, vehicles, protocol, address):
+        """Store projects from ecu."""
+        for i in projects:
+            if i not in vehicles:
+                if i not in self.unknown_vehicles:
+                    self.unknown_vehicles[i] = 0
+                self.unknown_vehicles[i] += 1
+            else:
+                if i not in self.vehiclemap:
+                    self.vehiclemap[i] = []
+                self.vehiclemap[i].append((protocol, address))
 
     def get_targets(self, name):
         """Get targets."""
