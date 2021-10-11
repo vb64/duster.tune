@@ -74,7 +74,8 @@ class Database:
     def __init__(self, zip_name, known_vehicles):
         """Database instanse."""
         self.count = 0
-        self.targets = []
+        self.targets_by_name = {}
+        self.targets_by_href = {}
         self.unknown_vehicles = {}
         self.vehiclemap = {}
         self.protocol_kwp = {}
@@ -91,13 +92,13 @@ class Database:
             autoidents = i['autoidents']
 
             if not autoidents:
-                self.targets.append(Ident(
+                self.add_target(Ident(
                   "", "", "", "",
                   name, group, href, protocol, projects, address
                 ))
 
             for j in autoidents:
-                self.targets.append(Ident(
+                self.add_target(Ident(
                   j['diagnostic_version'],
                   j['supplier_code'],
                   j['soft_version'],
@@ -107,6 +108,16 @@ class Database:
 
             self.add_protocol(protocol, address)
             self.add_projects(projects, known_vehicles, protocol, address)
+
+    def add_target(self, ident):
+        """Store ident in target dicts."""
+        if ident.name not in self.targets_by_name:
+            self.targets_by_name[ident.name] = []
+        self.targets_by_name[ident.name].append(ident)
+
+        if ident.href not in self.targets_by_href:
+            self.targets_by_href[ident.href] = []
+        self.targets_by_href[ident.href].append(ident)
 
     def add_protocol(self, protocol, address):
         """Store ecu address in protocols."""
@@ -131,16 +142,8 @@ class Database:
 
     def get_targets_by_name(self, name):
         """Get targets by name."""
-        tgt = []
-        for i in self.targets:
-            if i.name == name:
-                tgt.append(i)
-        return tgt
+        return self.targets_by_name.get(name, [])
 
     def get_targets_by_href(self, href):
         """Get targets by href."""
-        tgt = []
-        for i in self.targets:
-            if i.href == href:
-                tgt.append(i)
-        return tgt
+        return self.targets_by_href.get(href, [])
