@@ -1,16 +1,43 @@
-# -*- coding: utf-8 -*-
-"""Ecu databse."""
+"""Ecu database."""
 import zipfile
 import json
 
 
-# Protocols:
-# KWP2000 FastInit MonoPoint            ?ATSP 5?
-# KWP2000 FastInit MultiPoint           ?ATSP 5?
-# KWP2000 Init 5 Baud Type I and II     ?ATSP 4?
-# DiagOnCAN                             ATSP 6
-# CAN Messaging (125 kbps CAN)          ?ATSP B?
-# ISO8                                  ?ATSP 3?
+class Protocol:
+    """Supported protocols.
+
+    KWP2000 FastInit MonoPoint            ?ATSP 5?
+    KWP2000 FastInit MultiPoint           ?ATSP 5?
+    KWP2000 Init 5 Baud Type I and II     ?ATSP 4?
+    DiagOnCAN                             ATSP 6
+    CAN Messaging (125 kbps CAN)          ?ATSP B?
+    ISO8                                  ?ATSP 3?
+    """
+
+    CAN = 'CAN'
+    KWP = 'KWP2000'
+    ISO8 = 'ISO8'
+
+    SignCAN = 'CAN'
+    SignKWP = 'KWP'
+    SignISO8 = 'ISO8'
+
+    @staticmethod
+    def get(text):
+        """Restore protocol from text."""
+        text = text.upper()
+        protocol = 'UNKNOWN'
+
+        if Protocol.SignCAN in text:
+            protocol = Protocol.CAN
+        elif Protocol.SignKWP in text:
+            protocol = Protocol.KWP
+        elif Protocol.SignISO8 in text:
+            protocol = Protocol.ISO8
+
+        return protocol
+
+
 class Ident:
     """Ident item."""
 
@@ -37,14 +64,7 @@ class Ident:
         self.projects = projects
         self.href = href
         self.addr = address
-        if "CAN" in protocol.upper():
-            self.protocol = 'CAN'
-        elif "KWP" in protocol.upper():
-            self.protocol = 'KWP2000'
-        elif "ISO8" in protocol.upper():
-            self.protocol = 'ISO8'
-        else:
-            self.protocol = 'UNKNOWN'
+        self.protocol = Protocol.get(protocol)
         self.hash_code = diagversion + supplier + soft + version
 
 
@@ -57,8 +77,9 @@ class Database:
         self.targets = []
         self.unknown_vehicles = {}
         self.vehiclemap = {}
-        self.protocol_kwp = []
-        self.protocol_can = []
+        self.protocol_kwp = {}
+        self.protocol_can = {}
+        self.protocol_unknown = {}
 
         for href, i in json.loads(zipfile.ZipFile(zip_name, mode='r').read("db.json")).items():
             self.count += 1
@@ -68,13 +89,6 @@ class Database:
             address = str(i['address'])
             name = i['ecuname']
             autoidents = i['autoidents']
-
-            if 'KWP' in protocol:
-                if address not in self.protocol_kwp:
-                    self.protocol_kwp.append(address)
-            elif 'CAN' in protocol:
-                if address not in self.protocol_can:
-                    self.protocol_can.append(address)
 
             if not autoidents:
                 self.targets.append(Ident(
@@ -91,7 +105,17 @@ class Database:
                   name, group, href, protocol, projects, address
                 ))
 
+            self.add_protocol(protocol, address)
             self.add_projects(projects, known_vehicles, protocol, address)
+
+    def add_protocol(self, protocol, address):
+        """Store ecu address in protocols."""
+        if Protocol.SignKWP in protocol:
+            self.protocol_kwp[address] = True
+        elif Protocol.SignCAN in protocol:
+            self.protocol_can[address] = True
+        else:
+            self.protocol_unknown[protocol] = True
 
     def add_projects(self, projects, known_vehicles, protocol, address):
         """Store projects from ecu."""
