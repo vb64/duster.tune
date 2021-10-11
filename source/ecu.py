@@ -25,8 +25,7 @@ class Ident:
       href,
       protocol,
       projects,
-      address,
-      zipped=False
+      address
     ):
         """Ident item."""
         self.diagversion = diagversion
@@ -46,8 +45,7 @@ class Ident:
             self.protocol = 'ISO8'
         else:
             self.protocol = 'UNKNOWN'
-        self.hash = diagversion + supplier + soft + version
-        self.zipped = zipped
+        self.hash_code = diagversion + supplier + soft + version
 
 
 class Database:
@@ -62,14 +60,14 @@ class Database:
         self.protocol_kwp = []
         self.protocol_can = []
 
-        for href, targetv in json.loads(zipfile.ZipFile(zip_name, mode='r').read("db.json")).items():
+        for href, i in json.loads(zipfile.ZipFile(zip_name, mode='r').read("db.json")).items():
             self.count += 1
-            group = targetv['group']
-            protocol = targetv['protocol']
-            projects = targetv['projects']
-            address = str(targetv['address'])
-            name = targetv['ecuname']
-            autoidents = targetv['autoidents']
+            group = i['group']
+            protocol = i['protocol']
+            projects = i['projects']
+            address = str(i['address'])
+            name = i['ecuname']
+            autoidents = i['autoidents']
 
             if 'KWP' in protocol:
                 if address not in self.protocol_kwp:
@@ -82,7 +80,7 @@ class Database:
                 ecu_ident = Ident(
                   "", "", "", "",
                   name, group, href, protocol,
-                  projects, address, True
+                  projects, address
                 )
                 self.targets.append(ecu_ident)
             else:
@@ -93,7 +91,7 @@ class Database:
                       target['soft_version'],
                       target['version'],
                       name, group, href, protocol,
-                      projects, address, True
+                      projects, address
                     )
 
                     self.targets.append(ecu_ident)
