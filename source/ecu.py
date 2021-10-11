@@ -77,24 +77,19 @@ class Database:
                     self.protocol_can.append(address)
 
             if not autoidents:
-                ecu_ident = Ident(
+                self.targets.append(Ident(
                   "", "", "", "",
-                  name, group, href, protocol,
-                  projects, address
-                )
-                self.targets.append(ecu_ident)
-            else:
-                for target in autoidents:
-                    ecu_ident = Ident(
-                      target['diagnostic_version'],
-                      target['supplier_code'],
-                      target['soft_version'],
-                      target['version'],
-                      name, group, href, protocol,
-                      projects, address
-                    )
+                  name, group, href, protocol, projects, address
+                ))
 
-                    self.targets.append(ecu_ident)
+            for j in autoidents:
+                self.targets.append(Ident(
+                  j['diagnostic_version'],
+                  j['supplier_code'],
+                  j['soft_version'],
+                  j['version'],
+                  name, group, href, protocol, projects, address
+                ))
 
             self.add_projects(projects, vehicles, protocol, address)
 

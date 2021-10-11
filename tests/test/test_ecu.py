@@ -20,6 +20,9 @@ class TestEcu(TestBase):
         assert ecu_db.count == 3478
         assert len(ecu_db.unknown_vehicles) == 77
         assert len(ecu_db.vehiclemap) == len(DATA)
+        assert len(ecu_db.targets) == 28285
+        assert len(ecu_db.protocol_kwp) == 28
+        assert len(ecu_db.protocol_can) == 133
 
         # print("## Unknown:")
         # for i, j in ecu_db.unknown_vehicles.items():
