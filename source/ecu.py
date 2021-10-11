@@ -3,126 +3,6 @@
 import zipfile
 import json
 
-GROUP_MAPPING = {
-  "02": "Suspension pilotee",
-  "51": "Cluster/TdB",
-  "29": "Climatisation",
-  "D2": "GATEWAY",
-  "00": "CAN sniffer",
-  "1E": "4WD",
-  "01": "ABS/ESC",
-  "95": "EVC",
-  "26": "BCM/UCH",
-  "60": "HMD",
-  "50": "Tachometer",
-  "A1": "HFM",
-  "93": "LBC",
-  "6E": "BVA",
-  "04": "Power steering",
-  "68": "PEB",
-  "58": "Navigation",
-  "2B": "RADAR",
-  "F7": "LDCM",
-  "08": "TPMS",
-  "C0": "HFM",
-  "13": "Audio",
-  "59": "MIU",
-  "F8": "RDCM",
-  "24": "ACC",
-  "27": "EMM",
-  "A8": "LBC2",
-  "23": "4WS",
-  "11": "ADAS-Sub",
-  "2E": "UBP",
-  "67": "BCB",
-  "0E": "Aide au parking",
-  "0D": "Frein de parking electrique",
-  "28": "CSHV",
-  "FF": "CAN2",
-  "62": "FCAM",
-  "DA": "EVC-HCM-VCM",
-  "E8": "SVS",
-  "2F": "IKEY",
-  "64": "SOW_right",
-  "07": "HLS",
-  "D3": "Urea pump",
-  "77": "TCU",
-  "86": "AAU",
-  "3A": "AAM",
-  "4D": "SCU",
-  "DF": "Cluster",
-  "A5": "DCM",
-  "10": "Injection NISSAN",
-  "0B": "ACC",
-  "61": "Video",
-  "46": "Engineering",
-  "EA": "TCASE",
-  "87": "C-Box",
-  "1B": "DIFF LOCK",
-  "72": "Lampes a decharge a droite",
-  "ED": "Audio",
-  "EC": "TPAD",
-  "1C": "Pilotage capote",
-  "37": "Onduleur",
-  "D0": "GATEWAY",
-  "32": "Superviseur",
-  "A6": "PDCM",
-  "66": "VCCU",
-  "71": "HLL_DDL2",
-  "E9": "EPS",
-  "25": "IDM",
-  "79": "GPL",
-  "E2": "C-Display",
-  "A7": "PBD",
-  "6B": "Pre-heater",
-  "2D": "ABS-ESC",
-  "97": "PLC/PLGW",
-  "DE": "ASBMD",
-  "31": "Transpondeur",
-  "63": "SOW Left",
-  "E6": "SCCM",
-  "2A": "ADP",
-  "0F": "HFCK",
-  "EB": "HU",
-  "78": "DCM",
-  "73": "Embrayage pilote",
-  "5B": "ADAS Insulator",
-  "5A": "ODS_DDL2",
-  "3F": "GPS Alarm",
-  "81": "VSP",
-  "40": "TSR_FRONTCAM",
-  "06": "EMCU",
-  "E1": "CCU",
-  "1A": "Additional Heater",
-  "E3": "HMI GateWay",
-  "AE": "UCBIC ISO8",
-  "91": "LBC (HEV) CPC",
-  "09": "MC HEV FSCM",
-  "EE": "Controlographe",
-  "52": "Synthese de la parole",
-  "D1": "UDM",
-  "E7": "SCRCM",
-  "41": "GATEWAY",
-  "2C": "Airbag",
-  "70": "Lampes a decharge",
-  "E4": "IBS",
-  "E0": "HERMES",
-  "7A": "Injection",
-  "AB": "Regulateur de vitesse (ISO 8)",
-  "B0": "Transpondeur (ISO8)",
-  "82": "WCGS",
-}
-
-
-def hex16_tosigned(value):
-    """Return signed value from 16 bits (2 bytes)."""
-    return -(value & 0x8000) | (value & 0x7fff)
-
-
-def hex8_tosigned(value):
-    """Return signed value from 8 bits (1 byte)."""
-    return -(value & 0x80) | (value & 0x7f)
-
 
 # Protocols:
 # KWP2000 FastInit MonoPoint            ?ATSP 5?
@@ -131,7 +11,6 @@ def hex8_tosigned(value):
 # DiagOnCAN                             ATSP 6
 # CAN Messaging (125 kbps CAN)          ?ATSP B?
 # ISO8                                  ?ATSP 3?
-
 class Ident:
     """Ident item."""
 
@@ -170,62 +49,19 @@ class Ident:
         self.hash = diagversion + supplier + soft + version
         self.zipped = zipped
 
-    def check_with(self, diagversion, supplier, soft, version, addr):
-        """Checking."""
-        if self.diagversion == "":
-            return None
-        supplier_strip = self.supplier.strip()
-        soft_strip = self.soft.strip()
-        version_strip = self.version.strip()
-        if int("0x" + self.diagversion, 16) != int("0x" + diagversion, 16):
-            return False
-        if supplier_strip != supplier.strip()[:len(supplier_strip)]:
-            return False
-        if soft_strip != soft.strip()[:len(soft_strip)]:
-            return False
-        if version_strip != version.strip()[:len(version_strip)]:
-            return False
-
-        self.addr = addr
-        return True
-
-    def dump(self):
-        """Dump data."""
-        return {
-          'diagnostic_version': self.diagversion,
-          'supplier_code': self.supplier,
-          'soft_version': self.soft,
-          'version': self.version,
-          'group': self.group,
-          'projects': list(self.projects),
-          'protocol': self.protocol,
-          'address': self.addr,
-        }
-
 
 class Database:
     """Ecu database."""
 
-    def __init__(self):
+    def __init__(self, zip_name):
         """Database instanse."""
+        self.numecu = 0
         self.targets = []
         self.vehiclemap = {}
-        self.numecu = 0
         self.available_addr_kwp = []
         self.available_addr_can = []
-        self.addr_group_mapping_long = {}
 
-        inp = open("./json/addressing.json", "r")
-        jsn = json.loads(inp.read())
-        inp.close()
-
-        for key, val in jsn.iteritems():
-            GROUP_MAPPING[key] = val[0]
-            self.addr_group_mapping_long[key] = val[1]
-
-        jsdb = zipfile.ZipFile("ecu.zip", mode='r').read("db.json")
-        dbdict = json.loads(jsdb)
-        for href, targetv in dbdict.iteritems():
+        for href, targetv in json.loads(zipfile.ZipFile(zip_name, mode='r').read("db.json")).items():
             self.numecu += 1
             ecugroup = targetv['group']
             ecuprotocol = targetv['protocol']
@@ -239,9 +75,6 @@ class Database:
             elif 'CAN' in ecuprotocol:
                 if ecuaddress not in self.available_addr_can:
                     self.available_addr_can.append(str(ecuaddress))
-
-            if str(ecuaddress) not in GROUP_MAPPING:
-                GROUP_MAPPING[ecuaddress] = targetv['group']
 
             if len(targetv['autoidents']) == 0:
                 ecu_ident = Ident(
@@ -264,17 +97,9 @@ class Database:
                     self.targets.append(ecu_ident)
 
             for proj in ecuprojects:
-                projname = proj[0:3].upper()
-                if projname not in self.vehiclemap:
-                    self.vehiclemap[projname] = []
-                self.vehiclemap[projname].append((ecuprotocol, ecuaddress))
-
-    def get_target(self, name):
-        """Get target."""
-        for i in self.targets:
-            if i.name == name:
-                return i
-        return None
+                if proj not in self.vehiclemap:
+                    self.vehiclemap[proj] = []
+                self.vehiclemap[proj].append((ecuprotocol, ecuaddress))
 
     def get_targets(self, name):
         """Get targets."""
@@ -291,11 +116,3 @@ class Database:
             if i.href == href:
                 tgt.append(i)
         return tgt
-
-    def dump(self):
-        """Dump data."""
-        jsn = []
-        for i in self.targets:
-            if i.protocol in ['CAN', 'KWP2000', 'ISO8']:
-                jsn.append(i.dump())
-        return json.dumps(jsn, indent=1)
