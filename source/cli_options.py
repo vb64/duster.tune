@@ -17,12 +17,19 @@ PARSER.add_option(
   "--com",
   dest="portname",
   default="COM1",
-  help="Set COM port name for ELM327 device. Default is COM1"
+  help="Set COM port name for ELM327 device. Default is COM1."
 )
 PARSER.add_option(
   "--vehicle",
   dest="vehicle_code",
   choices=list(vehicles.DATA.keys()) + [vehicles.NOT_SELECTED],
   default=vehicles.NOT_SELECTED,
-  help="Set target vehicle for explore. Default is {} (vehicle not selected)".format(vehicles.NOT_SELECTED)
+  help="Set target vehicle for explore. Default is {} (vehicle not selected).".format(vehicles.NOT_SELECTED)
+)
+PARSER.add_option(
+  "--noelm",
+  action="store_true",
+  dest="noelm",
+  default=False,
+  help="Don't search for ELM327 device, just view ecus."
 )

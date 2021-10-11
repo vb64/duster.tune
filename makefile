@@ -20,7 +20,7 @@ PIP = $(PYTHON) -m pip install
 LINT = $(PYTHON) -m pylint --load-plugins=pylint.extensions.mccabe --max-complexity=10
 
 run:
-	$(PYTHON) $(SOURCE)/main.py
+	$(PYTHON) $(SOURCE)/main.py --noelm
 
 test:
 	$(PTEST) -s $(TESTS)/test/$(T)

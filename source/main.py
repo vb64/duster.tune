@@ -9,24 +9,26 @@ COPYRIGHTS = '(C) by Vitaly Bogomolov 2021'
 OPTS = None
 
 
-def main(_argv, _options):
+def main(_argv, options):
     """Entry point."""
-    print("ELM scanner. {}".format(COPYRIGHTS))
+    print("Vehicle settings viewer. {}".format(COPYRIGHTS))
     # PARSER.print_usage()
 
-    print("Searching for ELM device...")
     device = None
-    for port, desc, _hwid in comports():
-        print("Try {} {}...".format(port, desc))
-        device = Device.at_port(port, 38400)
-        if device:
-            break
+    if not options.noelm:
 
-    if not device:
-        print("No ELM device found.")
-        return 1
+        print("Searching for ELM device...")
+        for port, desc, _hwid in comports():
+            print("Try {} {}...".format(port, desc))
+            device = Device.at_port(port, 38400)
+            if device:
+                break
 
-    print("Using {}".format(device))
+    if device:
+        print("Using {}".format(device))
+    else:
+        print("No ELM device set.")
+
     return 0
 
 
