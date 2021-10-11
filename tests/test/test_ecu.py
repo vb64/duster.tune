@@ -17,7 +17,7 @@ class TestEcu(TestBase):
         # ecu_db = Database(self.fixture('ecu_2018.zip'))
         # assert ecu_db.numecu == 1835
         ecu_db = Database(self.fixture('ecu_2019.zip'), DATA)
-        assert ecu_db.numecu == 3478
+        assert ecu_db.count == 3478
         assert len(ecu_db.unknown_vehicles) == 77
         assert len(ecu_db.vehiclemap) == len(DATA)
 

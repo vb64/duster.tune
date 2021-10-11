@@ -55,7 +55,7 @@ class Database:
 
     def __init__(self, zip_name, vehicles):
         """Database instanse."""
-        self.numecu = 0
+        self.count = 0
         self.targets = []
         self.unknown_vehicles = {}
         self.vehiclemap = {}
@@ -63,41 +63,42 @@ class Database:
         self.protocol_can = []
 
         for href, targetv in json.loads(zipfile.ZipFile(zip_name, mode='r').read("db.json")).items():
-            self.numecu += 1
-            ecugroup = targetv['group']
-            ecuprotocol = targetv['protocol']
-            ecuprojects = targetv['projects']
-            ecuaddress = str(targetv['address'])
-            ecuname = targetv['ecuname']
+            self.count += 1
+            group = targetv['group']
+            protocol = targetv['protocol']
+            projects = targetv['projects']
+            address = str(targetv['address'])
+            name = targetv['ecuname']
+            autoidents = targetv['autoidents']
 
-            if 'KWP' in ecuprotocol:
-                if ecuaddress not in self.protocol_kwp:
-                    self.protocol_kwp.append(ecuaddress)
-            elif 'CAN' in ecuprotocol:
-                if ecuaddress not in self.protocol_can:
-                    self.protocol_can.append(ecuaddress)
+            if 'KWP' in protocol:
+                if address not in self.protocol_kwp:
+                    self.protocol_kwp.append(address)
+            elif 'CAN' in protocol:
+                if address not in self.protocol_can:
+                    self.protocol_can.append(address)
 
-            if len(targetv['autoidents']) == 0:
+            if not autoidents:
                 ecu_ident = Ident(
                   "", "", "", "",
-                  ecuname, ecugroup, href, ecuprotocol,
-                  ecuprojects, ecuaddress, True
+                  name, group, href, protocol,
+                  projects, address, True
                 )
                 self.targets.append(ecu_ident)
             else:
-                for target in targetv['autoidents']:
+                for target in autoidents:
                     ecu_ident = Ident(
                       target['diagnostic_version'],
                       target['supplier_code'],
                       target['soft_version'],
                       target['version'],
-                      ecuname, ecugroup, href, ecuprotocol,
-                      ecuprojects, ecuaddress, True
+                      name, group, href, protocol,
+                      projects, address, True
                     )
 
                     self.targets.append(ecu_ident)
 
-            self.add_projects(ecuprojects, vehicles, ecuprotocol, ecuaddress)
+            self.add_projects(projects, vehicles, protocol, address)
 
     def add_projects(self, projects, vehicles, protocol, address):
         """Store projects from ecu."""
