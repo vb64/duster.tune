@@ -1,18 +1,7 @@
 # -*- coding: utf-8 -*-
 """Ecu databse."""
-import os
 import zipfile
 import json
-import glob
-
-__author__ = "Cedric PAILLE"
-__copyright__ = "Copyright 2016-2018"
-__credits__ = []
-__license__ = "GPL"
-__version__ = "1.0.0"
-__maintainer__ = "Cedric PAILLE"
-__email__ = "cedricpaille@gmail.com"
-__status__ = "Beta"
 
 GROUP_MAPPING = {
   "02": "Suspension pilotee",
@@ -217,9 +206,7 @@ class Ident:
 class Database:
     """Ecu database."""
 
-    jsonfile = "json/ecus.zip"
-
-    def __init__(self, forceXML=False):
+    def __init__(self):
         """Database instanse."""
         self.targets = []
         self.vehiclemap = {}
@@ -236,100 +223,51 @@ class Database:
             GROUP_MAPPING[key] = val[0]
             self.addr_group_mapping_long[key] = val[1]
 
-        jsonecu_files = glob.glob("./json/*.json.targets")
-        for jsonecu_file in jsonecu_files:
+        jsdb = zipfile.ZipFile("ecu.zip", mode='r').read("db.json")
+        dbdict = json.loads(jsdb)
+        for href, targetv in dbdict.iteritems():
             self.numecu += 1
-            json_file = open(jsonecu_file, "r")
-            json_data = json_file.read()
-            json_file.close()
-            ecus_dict = json.loads(json_data)
-            for ecu_dict in ecus_dict:
-                href = jsonecu_file.replace(".targets", "")
-                name = os.path.basename(href)
-                # Fix typo bug
-                diagversion = ""
-                if 'diagnostic_version' in ecu_dict:
-                    diagversion = ecu_dict['diagnostic_version']
-                else:
-                    diagversion = ecu_dict['diagnotic_version']
+            ecugroup = targetv['group']
+            ecuprotocol = targetv['protocol']
+            ecuprojects = targetv['projects']
+            ecuaddress = targetv['address']
+            ecuname = targetv['ecuname']
 
-                addr = ecu_dict['address']
+            if 'KWP' in ecuprotocol:
+                if ecuaddress not in self.available_addr_kwp:
+                    self.available_addr_kwp.append(str(ecuaddress))
+            elif 'CAN' in ecuprotocol:
+                if ecuaddress not in self.available_addr_can:
+                    self.available_addr_can.append(str(ecuaddress))
 
-                if 'KWP' in ecu_dict['protocol']:
-                    if addr not in self.available_addr_kwp:
-                        self.available_addr_kwp.append(str(addr))
-                elif 'CAN' in ecu_dict['protocol']:
-                    if addr not in self.available_addr_can:
-                        self.available_addr_can.append(str(addr))
+            if str(ecuaddress) not in GROUP_MAPPING:
+                GROUP_MAPPING[ecuaddress] = targetv['group']
 
-                if str(addr) not in GROUP_MAPPING:
-                    print("Adding group ", addr,  ecu_dict['group'])
-                    GROUP_MAPPING[str(addr)] = ecu_dict['group']
-
+            if len(targetv['autoidents']) == 0:
                 ecu_ident = Ident(
-                  diagversion,
-                  ecu_dict['supplier_code'],
-                  ecu_dict['soft_version'], ecu_dict['version'],
-                  name, ecu_dict['group'], href, ecu_dict['protocol'],
-                  ecu_dict['projects'], addr
+                  "", "", "", "",
+                  ecuname, ecugroup, href, ecuprotocol,
+                  ecuprojects, ecuaddress, True
                 )
-
-                for proj in ecu_dict['projects']:
-                    projname = proj[0:3].upper()
-                    if projname not in self.vehiclemap:
-                        self.vehiclemap[projname] = []
-                    self.vehiclemap[projname].append((ecu_dict['protocol'], addr))
-
                 self.targets.append(ecu_ident)
-
-        if os.path.exists("ecu.zip") and not forceXML:
-            jsdb = zipfile.ZipFile("ecu.zip", mode='r').read("db.json")
-            dbdict = json.loads(jsdb)
-            for href, targetv in dbdict.iteritems():
-                self.numecu += 1
-                ecugroup = targetv['group']
-                ecuprotocol = targetv['protocol']
-                ecuprojects = targetv['projects']
-                ecuaddress = targetv['address']
-                ecuname = targetv['ecuname']
-
-                if 'KWP' in ecuprotocol:
-                    if ecuaddress not in self.available_addr_kwp:
-                        self.available_addr_kwp.append(str(ecuaddress))
-                elif 'CAN' in ecuprotocol:
-                    if ecuaddress not in self.available_addr_can:
-                        self.available_addr_can.append(str(ecuaddress))
-
-                if str(ecuaddress) not in GROUP_MAPPING:
-                    GROUP_MAPPING[ecuaddress] = targetv['group']
-
-                if len(targetv['autoidents']) == 0:
+            else:
+                for target in targetv['autoidents']:
                     ecu_ident = Ident(
-                      "", "", "", "",
+                      target['diagnostic_version'],
+                      target['supplier_code'],
+                      target['soft_version'],
+                      target['version'],
                       ecuname, ecugroup, href, ecuprotocol,
                       ecuprojects, ecuaddress, True
                     )
+
                     self.targets.append(ecu_ident)
-                else:
-                    for target in targetv['autoidents']:
-                        ecu_ident = Ident(
-                          target['diagnostic_version'],
-                          target['supplier_code'],
-                          target['soft_version'],
-                          target['version'],
-                          ecuname, ecugroup, href, ecuprotocol,
-                          ecuprojects, ecuaddress, True
-                        )
 
-                        self.targets.append(ecu_ident)
-
-                for proj in ecuprojects:
-                    projname = proj[0:3].upper()
-                    if projname not in self.vehiclemap:
-                        self.vehiclemap[projname] = []
-                    self.vehiclemap[projname].append((ecuprotocol, ecuaddress))
-
-                self.targets.append(ecu_ident)
+            for proj in ecuprojects:
+                projname = proj[0:3].upper()
+                if projname not in self.vehiclemap:
+                    self.vehiclemap[projname] = []
+                self.vehiclemap[projname].append((ecuprotocol, ecuaddress))
 
     def get_target(self, name):
         """Get target."""
