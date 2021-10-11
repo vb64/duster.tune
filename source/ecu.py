@@ -59,23 +59,23 @@ class Database:
         self.targets = []
         self.unknown_vehicles = {}
         self.vehiclemap = {}
-        self.available_addr_kwp = []
-        self.available_addr_can = []
+        self.protocol_kwp = []
+        self.protocol_can = []
 
         for href, targetv in json.loads(zipfile.ZipFile(zip_name, mode='r').read("db.json")).items():
             self.numecu += 1
             ecugroup = targetv['group']
             ecuprotocol = targetv['protocol']
             ecuprojects = targetv['projects']
-            ecuaddress = targetv['address']
+            ecuaddress = str(targetv['address'])
             ecuname = targetv['ecuname']
 
             if 'KWP' in ecuprotocol:
-                if ecuaddress not in self.available_addr_kwp:
-                    self.available_addr_kwp.append(str(ecuaddress))
+                if ecuaddress not in self.protocol_kwp:
+                    self.protocol_kwp.append(ecuaddress)
             elif 'CAN' in ecuprotocol:
-                if ecuaddress not in self.available_addr_can:
-                    self.available_addr_can.append(str(ecuaddress))
+                if ecuaddress not in self.protocol_can:
+                    self.protocol_can.append(ecuaddress)
 
             if len(targetv['autoidents']) == 0:
                 ecu_ident = Ident(
