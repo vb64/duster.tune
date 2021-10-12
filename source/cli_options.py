@@ -36,6 +36,6 @@ PARSER.add_option(
 PARSER.add_option(
   "--ecuzip",
   dest="ecus_file",
-  default="ecus.zip",
-  help="Path to ecus.zip database file. Default is ecus.zip in current dir."
+  default="ecu.zip",
+  help="Path to zipped ecu database file. Default is ecu.zip in current dir."
 )

@@ -26,13 +26,16 @@ class TestConsole(TestBase):
         from source import main
 
         self.options.noelm = True
+        self.options.ecus_file = self.fixture('ecu_2018.zip')
         assert main.main([], self.options) == 0
 
     def test_no_elm(self):
         """Call app without ELM device."""
         from source import main
-        saved = main.comports
 
+        self.options.ecus_file = self.fixture('ecu_2018.zip')
+
+        saved = main.comports
         main.comports = stub_com1_bluetooth
         assert main.main([], self.options) == 0
         main.comports = saved
@@ -43,6 +46,7 @@ class TestConsole(TestBase):
         from source.elm import serial as mockserial
         from tests.mock.serial import MockElm
 
+        self.options.ecus_file = self.fixture('ecu_2018.zip')
         saved = mockserial.Serial
         mockserial.Serial = MockElm
 

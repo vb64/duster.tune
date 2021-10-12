@@ -49,6 +49,8 @@ class TestEcu(TestBase):
         assert count == 28285
         assert not ecu_db.get_targets_by_href('XXX')
 
+        duster2021 = ecu_db.vehiclemap["xJD"]
+        assert len(duster2021) == 414
         # print("## Unknown vehicles:")
         # for i, j in ecu_db.unknown_vehicles.items():
         #     print("#", i, '->', j)
