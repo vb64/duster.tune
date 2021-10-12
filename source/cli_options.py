@@ -33,3 +33,9 @@ PARSER.add_option(
   default=False,
   help="Don't search for ELM327 device, just view ecus."
 )
+PARSER.add_option(
+  "--ecuzip",
+  dest="ecus_file",
+  default="ecu.zip",
+  help="Path to zipped ecu database file. Default is ecu.zip in current dir."
+)
