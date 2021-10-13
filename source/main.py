@@ -50,6 +50,10 @@ def main(_argv, options):
     data = ecu_db.vehicles[options.vehicle_code]
 
     print("Processing ecus for '{}'...".format(vehicle_name))
+    for i in data:
+        print(str(i))
+
+    print()
     print("Ecus number:", len(data))
 
     return 0

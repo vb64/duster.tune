@@ -51,6 +51,10 @@ class Item:
         self.name = data['ecuname']
         self.autoidents = data['autoidents']
 
+    def __str__(self):
+        """String representation."""
+        return "{} -> {} [{} {}]".format(self.group, self.name, self.protocol, self.address)
+
 
 class Database:
     """Ecu database."""
