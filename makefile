@@ -20,7 +20,7 @@ PIP = $(PYTHON) -m pip install
 LINT = $(PYTHON) -m pylint --load-plugins=pylint.extensions.mccabe --max-complexity=10
 
 run:
-	$(PYTHON) $(SOURCE)/main.py --noelm --ecuzip=tests/fixture/ecu_2019.zip
+	$(PYTHON) $(SOURCE)/main.py --noelm --ecuzip=tests/fixture/ecu_2019.zip --vehicle=xJD
 
 test:
 	$(PTEST) -s $(TESTS)/test/$(T)

@@ -21,13 +21,22 @@ def stub_com45_bluetooth():
 class TestConsole(TestBase):
     """Tests console client."""
 
+    def test_duster2021(self):
+        """Call app with --noelm option and DusterII vehicle code."""
+        from source import main
+
+        self.options.noelm = True
+        self.options.ecus_file = self.fixture('ecu_2019.zip')
+        self.options.vehicle_code = "xJD"
+        assert main.main([], self.options) == 0
+
     def test_noelm_cli(self):
         """Call app with --noelm option."""
         from source import main
 
         self.options.noelm = True
         self.options.ecus_file = self.fixture('ecu_2018.zip')
-        assert main.main([], self.options) == 0
+        assert main.main([], self.options) == 1
 
     def test_no_elm(self):
         """Call app without ELM device."""
@@ -37,7 +46,7 @@ class TestConsole(TestBase):
 
         saved = main.comports
         main.comports = stub_com1_bluetooth
-        assert main.main([], self.options) == 0
+        assert main.main([], self.options) == 1
         main.comports = saved
 
     def test_elm(self):
@@ -50,5 +59,5 @@ class TestConsole(TestBase):
         saved = mockserial.Serial
         mockserial.Serial = MockElm
 
-        assert main.main([], self.options) == 0
+        assert main.main([], self.options) == 1
         mockserial.Serial = saved

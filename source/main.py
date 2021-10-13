@@ -5,10 +5,15 @@ from serial.tools.list_ports import comports
 from cli_options import PARSER, VERSION
 from elm import Device
 from ecu import Database
-from vehicles import DATA
+from vehicles import Vehicle, DATA
 
 COPYRIGHTS = '(C) by Vitaly Bogomolov 2021'
 OPTS = None
+
+
+def to866(text):
+    """Text for console redirection."""
+    return text.encode("cp866", errors='replace').decode("cp866")
 
 
 def find_elm(_options):
@@ -41,6 +46,16 @@ def main(_argv, options):
         print("Using {}".format(device))
     else:
         print("No ELM device set.", "Database view mode.")
+
+    if not options.vehicle_code:
+        print("Vehicle code not set.", "Use --vehicle option to set.")
+        return 1
+
+    vehicle = Vehicle(options.vehicle_code, ecu_db.vehicles[options.vehicle_code])
+    print(str(vehicle))
+    for group in sorted(vehicle.groups.keys()):
+        print("\n# {}: {}".format(to866(group), len(vehicle.groups[group])))
+        print(to866(vehicle.dump_group(group)))
 
     return 0
 

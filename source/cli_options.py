@@ -22,9 +22,9 @@ PARSER.add_option(
 PARSER.add_option(
   "--vehicle",
   dest="vehicle_code",
-  choices=list(vehicles.DATA.keys()) + [vehicles.NOT_SELECTED],
-  default=vehicles.NOT_SELECTED,
-  help="Set target vehicle for explore. Default is {} (vehicle not selected).".format(vehicles.NOT_SELECTED)
+  choices=list(vehicles.DATA.keys()) + [''],
+  default='',
+  help="Set target vehicle for explore. Default is empty (not selected)."
 )
 PARSER.add_option(
   "--noelm",
