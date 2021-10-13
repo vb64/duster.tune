@@ -5,7 +5,7 @@ from serial.tools.list_ports import comports
 from cli_options import PARSER, VERSION
 from elm import Device
 from ecu import Database
-from vehicles import DATA
+from vehicles import DATA, NOT_SELECTED
 
 COPYRIGHTS = '(C) by Vitaly Bogomolov 2021'
 OPTS = None
@@ -41,6 +41,12 @@ def main(_argv, options):
         print("Using {}".format(device))
     else:
         print("No ELM device set.", "Database view mode.")
+
+    if options.vehicle_code == NOT_SELECTED:
+        print("Vehicle code not set.", "Use --vehicle option to set.")
+        return 1
+
+    print("Processing ecus for '{}'...".format(DATA[options.vehicle_code]))
 
     return 0
 
