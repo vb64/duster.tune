@@ -46,7 +46,11 @@ def main(_argv, options):
         print("Vehicle code not set.", "Use --vehicle option to set.")
         return 1
 
-    print("Processing ecus for '{}'...".format(DATA[options.vehicle_code]))
+    vehicle_name = DATA[options.vehicle_code]
+    data = ecu_db.vehiclemap[options.vehicle_code]
+
+    print("Processing ecus for '{}'...".format(vehicle_name))
+    print("Ecus number:", len(data))
 
     return 0
 

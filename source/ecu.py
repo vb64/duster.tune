@@ -73,6 +73,7 @@ class Database:
 
     def __init__(self, zip_name, known_vehicles):
         """Database instanse."""
+        self.zip_name = zip_name
         self.count = 0
         self.targets_by_name = {}
         self.targets_by_href = {}
