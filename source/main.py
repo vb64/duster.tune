@@ -11,6 +11,11 @@ COPYRIGHTS = '(C) by Vitaly Bogomolov 2021'
 OPTS = None
 
 
+def to866(text):
+    """Text for console redirection."""
+    return text.encode("cp866", errors='replace').decode("cp866")
+
+
 def find_elm(_options):
     """Search for ELM device at the serial ports."""
     device = None
@@ -49,8 +54,8 @@ def main(_argv, options):
     vehicle = Vehicle(options.vehicle_code, ecu_db.vehicles[options.vehicle_code])
     print(str(vehicle))
     for group in sorted(vehicle.groups.keys()):
-        print("\n# {}: {}".format(group, len(vehicle.groups[group])))
-        print(vehicle.dump_group(group))
+        print("\n# {}: {}".format(to866(group), len(vehicle.groups[group])))
+        print(to866(vehicle.dump_group(group)))
 
     return 0
 
