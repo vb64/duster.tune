@@ -158,3 +158,38 @@ DATA2021 = {
   "x02E": "MICRA (NISSAN)",
   "x21": "NOTE (NISSAN)",
 }
+
+
+class Vehicle:
+    """Vehicle with ecu data."""
+
+    def __init__(self, code, ecu_list):
+        """Instanse from ecu data."""
+        self.code = code
+        self.name = DATA[code]
+        self.groups = {}
+        self.protocols = []
+        self.ecu_count = 0
+
+        for i in ecu_list:
+            self.ecu_count += 1
+
+            if i.group not in self.groups:
+                self.groups[i.group] = []
+            self.groups[i.group].append(i)
+
+            if i.protocol not in self.protocols:
+                self.protocols.append(i.protocol)
+
+    def __str__(self):
+        """String representation."""
+        return "{} ecus: {} groups: {} {}".format(
+          self.name,
+          self.ecu_count,
+          len(self.groups),
+          self.protocols,
+        )
+
+    def dump_group(self, group):
+        """Return group items as text."""
+        return '\n'.join(sorted([str(i) for i in self.groups[group]]))

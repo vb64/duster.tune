@@ -53,7 +53,7 @@ class Item:
 
     def __str__(self):
         """String representation."""
-        return "{} -> {} [{} {}]".format(self.group, self.name, self.protocol, self.address)
+        return "{} [{} {}]".format(self.name, self.protocol, self.address)
 
 
 class Database:

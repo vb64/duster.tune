@@ -5,7 +5,7 @@ from serial.tools.list_ports import comports
 from cli_options import PARSER, VERSION
 from elm import Device
 from ecu import Database
-from vehicles import DATA
+from vehicles import Vehicle, DATA
 
 COPYRIGHTS = '(C) by Vitaly Bogomolov 2021'
 OPTS = None
@@ -46,15 +46,11 @@ def main(_argv, options):
         print("Vehicle code not set.", "Use --vehicle option to set.")
         return 1
 
-    vehicle_name = DATA[options.vehicle_code]
-    data = ecu_db.vehicles[options.vehicle_code]
-
-    print("Processing ecus for '{}'...".format(vehicle_name))
-    for i in data:
-        print(str(i))
-
-    print()
-    print("Ecus number:", len(data))
+    vehicle = Vehicle(options.vehicle_code, ecu_db.vehicles[options.vehicle_code])
+    print(str(vehicle))
+    for group in sorted(vehicle.groups.keys()):
+        print("\n# {}: {}".format(group, len(vehicle.groups[group])))
+        print(vehicle.dump_group(group))
 
     return 0
 
