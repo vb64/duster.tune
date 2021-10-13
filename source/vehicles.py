@@ -1,5 +1,4 @@
 """Known vehicles."""
-NOT_SELECTED = 'ALL'
 
 DATA = {
   "xBA": "KWID CN",
