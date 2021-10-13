@@ -47,7 +47,7 @@ def main(_argv, options):
         return 1
 
     vehicle_name = DATA[options.vehicle_code]
-    data = ecu_db.vehiclemap[options.vehicle_code]
+    data = ecu_db.vehicles[options.vehicle_code]
 
     print("Processing ecus for '{}'...".format(vehicle_name))
     print("Ecus number:", len(data))

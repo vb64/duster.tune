@@ -38,113 +38,52 @@ class Protocol:
         return protocol
 
 
-class Ident:
-    """Ident item."""
+class Item:
+    """Database item."""
 
-    def __init__(
-      self,
-      diagversion,
-      supplier,
-      soft,
-      version,
-      name,
-      group,
-      href,
-      protocol,
-      projects,
-      address
-    ):
-        """Ident item."""
-        self.diagversion = diagversion
-        self.supplier = supplier
-        self.soft = soft
-        self.version = version
-        self.name = name
-        self.group = group
-        self.projects = projects
-        self.href = href
-        self.addr = address
-        self.protocol = Protocol.get(protocol)
-        self.hash_code = diagversion + supplier + soft + version
+    def __init__(self, file_name, data):
+        """Instanse from database data."""
+        self.file_name = file_name
+        self.group = data['group']
+        self.protocol = Protocol.get(data['protocol'])
+        self.projects = data['projects']
+        self.address = str(data['address'])
+        self.name = data['ecuname']
+        self.autoidents = data['autoidents']
 
 
 class Database:
     """Ecu database."""
 
     def __init__(self, zip_name, known_vehicles):
-        """Database instanse."""
+        """Read database items from zipped db.json file."""
         self.zip_name = zip_name
         self.count = 0
-        self.targets_by_name = {}
-        self.targets_by_href = {}
         self.unknown_vehicles = {}
-        self.vehiclemap = {}
+        self.vehicles = {}
         self.protocol_kwp = {}
         self.protocol_can = {}
         self.protocol_unknown = {}
 
-        for href, i in json.loads(zipfile.ZipFile(zip_name, mode='r').read("db.json")).items():
+        for fname, i in json.loads(zipfile.ZipFile(zip_name, mode='r').read("db.json")).items():
             self.count += 1
-            group = i['group']
-            protocol = i['protocol']
-            projects = i['projects']
-            address = str(i['address'])
-            name = i['ecuname']
-            autoidents = i['autoidents']
+            item = Item(fname, i)
 
-            if not autoidents:
-                self.add_target(Ident(
-                  "", "", "", "",
-                  name, group, href, protocol, projects, address
-                ))
-
-            for j in autoidents:
-                self.add_target(Ident(
-                  j['diagnostic_version'],
-                  j['supplier_code'],
-                  j['soft_version'],
-                  j['version'],
-                  name, group, href, protocol, projects, address
-                ))
-
-            self.add_protocol(protocol, address)
-            self.add_projects(projects, known_vehicles, protocol, address)
-
-    def add_target(self, ident):
-        """Store ident in target dicts."""
-        if ident.name not in self.targets_by_name:
-            self.targets_by_name[ident.name] = []
-        self.targets_by_name[ident.name].append(ident)
-
-        if ident.href not in self.targets_by_href:
-            self.targets_by_href[ident.href] = []
-        self.targets_by_href[ident.href].append(ident)
-
-    def add_protocol(self, protocol, address):
-        """Store ecu address in protocols."""
-        if Protocol.SignKWP in protocol:
-            self.protocol_kwp[address] = True
-        elif Protocol.SignCAN in protocol:
-            self.protocol_can[address] = True
-        else:
-            self.protocol_unknown[protocol] = True
-
-    def add_projects(self, projects, known_vehicles, protocol, address):
-        """Store projects from ecu."""
-        for i in projects:
-            if i not in known_vehicles:
-                if i not in self.unknown_vehicles:
-                    self.unknown_vehicles[i] = 0
-                self.unknown_vehicles[i] += 1
+            # Store ecu address in protocols.
+            if item.protocol == Protocol.KWP:
+                self.protocol_kwp[item.address] = True
+            elif item.protocol == Protocol.CAN:
+                self.protocol_can[item.address] = True
             else:
-                if i not in self.vehiclemap:
-                    self.vehiclemap[i] = []
-                self.vehiclemap[i].append((protocol, address))
+                self.protocol_unknown[item.protocol] = True
 
-    def get_targets_by_name(self, name):
-        """Get targets by name."""
-        return self.targets_by_name.get(name, [])
-
-    def get_targets_by_href(self, href):
-        """Get targets by href."""
-        return self.targets_by_href.get(href, [])
+            # Store projects from ecu.
+            for code in item.projects:
+                if code not in known_vehicles:
+                    if code not in self.unknown_vehicles:
+                        self.unknown_vehicles[code] = 0
+                    self.unknown_vehicles[code] += 1
+                else:
+                    if code not in self.vehicles:
+                        self.vehicles[code] = []
+                    self.vehicles[code].append(item)
