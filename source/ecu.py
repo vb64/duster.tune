@@ -38,6 +38,91 @@ class Protocol:
         return protocol
 
 
+class Control:
+    """Base class for Ecu controls."""
+
+    def __init__(self, ecu_data):
+        """Control instanse from ecu data."""
+        self.data = ecu_data
+
+    def strip(self, name):
+        """Clear spaces from data field."""
+        return ' '.join(self.data[name].split())
+
+    def __str__(self):
+        """String representation for Label."""
+        return self.strip('text')
+
+
+class Label(Control):
+    """Ecu label."""
+
+
+class Button(Control):
+    """Ecu button.
+
+    Fields: messages send text uniquename
+    """
+
+
+class Presend(Control):
+    """Ecu presend."""
+
+    def __str__(self):
+        """String representation for Label."""
+        return "{} [{}]".format(self.data['RequestName'], self.data['Delay'])
+
+
+class Display(Control):
+    """Ecu display."""
+
+    @property
+    def request(self):
+        """Request name."""
+        return self.data["request"]
+
+
+class Input(Display):
+    """Ecu input."""
+
+
+class Screen:
+    """Ecu screen."""
+
+    def __init__(self, ecu_data):
+        """Screen instanse from ecu data."""
+        self.data = ecu_data
+
+    def __str__(self):
+        """String representation for screen."""
+        return str(list(sorted(self.data.keys())))
+
+    @property
+    def buttons(self):
+        """Section buttons."""
+        return [Button(i) for i in self.data["buttons"]]
+
+    @property
+    def displays(self):
+        """Section displays."""
+        return [Display(i) for i in self.data["displays"]]
+
+    @property
+    def inputs(self):
+        """Section inputs."""
+        return [Input(i) for i in self.data["inputs"]]
+
+    @property
+    def labels(self):
+        """Section labels."""
+        return [Label(i) for i in self.data["labels"]]
+
+    @property
+    def presend(self):
+        """Section presend."""
+        return [Presend(i) for i in self.data["presend"]]
+
+
 class Item:
     """Database item."""
 
@@ -66,6 +151,22 @@ class Item:
             self.data_layout = ecu_db.load_json(self.file_name + '.layout')
 
         return self
+
+    @property
+    def categories(self):
+        """Return list of categories."""
+        if self.data_layout is None:
+            return []
+
+        return list(self.data_layout["categories"].keys())
+
+    def category(self, key):
+        """Return list of given category items."""
+        return self.data_layout["categories"][key]
+
+    def screen(self, key):
+        """Return Screen object for given key."""
+        return Screen(self.data_layout["screens"][key])
 
 
 class Database:
