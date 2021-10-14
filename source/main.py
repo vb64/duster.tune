@@ -51,7 +51,7 @@ def main(_argv, options):
         print("Vehicle code not set.", "Use --vehicle option to set.")
         return 1
 
-    vehicle = Vehicle(options.vehicle_code, ecu_db.vehicles[options.vehicle_code])
+    vehicle = Vehicle(options.vehicle_code, ecu_db)
     print(str(vehicle))
     for group in sorted(vehicle.groups.keys()):
         print("\n# {}: {}".format(to866(group), len(vehicle.groups[group])))

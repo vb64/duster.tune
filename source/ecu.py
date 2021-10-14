@@ -51,9 +51,21 @@ class Item:
         self.name = data['ecuname']
         self.autoidents = data['autoidents']
 
+        self.data_layout = None
+        self.data_json = None
+
     def __str__(self):
         """String representation."""
         return "{} [{} {}] {}".format(self.name, self.protocol, self.address, self.file_name)
+
+    def load_data(self, ecu_db):
+        """String representation."""
+        if self.data_json is None:
+            self.data_json = ecu_db.load_json(self.file_name)
+        if self.data_layout is None:
+            self.data_layout = ecu_db.load_json(self.file_name + '.layout')
+
+        return self
 
 
 class Database:
@@ -69,7 +81,7 @@ class Database:
         self.protocol_can = {}
         self.protocol_unknown = {}
 
-        for fname, i in json.loads(zipfile.ZipFile(zip_name, mode='r').read("db.json")).items():
+        for fname, i in self.load_json("db.json").items():
             self.count += 1
             item = Item(fname, i)
 
@@ -91,3 +103,7 @@ class Database:
                     if code not in self.vehicles:
                         self.vehicles[code] = []
                     self.vehicles[code].append(item)
+
+    def load_json(self, file_name):
+        """Load and return content of given json file from db zip."""
+        return json.loads(zipfile.ZipFile(self.zip_name, mode='r').read(file_name))

@@ -163,20 +163,21 @@ DATA2021 = {
 class Vehicle:
     """Vehicle with ecu data."""
 
-    def __init__(self, code, ecu_list):
+    def __init__(self, code, ecu_db):
         """Instanse from ecu data."""
+        self.ecu_db = ecu_db
         self.code = code
         self.name = DATA[code]
         self.groups = {}
         self.protocols = []
         self.ecu_count = 0
 
-        for i in ecu_list:
+        for i in ecu_db.vehicles[self.code]:
             self.ecu_count += 1
 
             if i.group not in self.groups:
-                self.groups[i.group] = []
-            self.groups[i.group].append(i)
+                self.groups[i.group] = {}
+            self.groups[i.group][i.file_name] = i
 
             if i.protocol not in self.protocols:
                 self.protocols.append(i.protocol)
@@ -192,4 +193,8 @@ class Vehicle:
 
     def dump_group(self, group):
         """Return group items as text."""
-        return '\n'.join(sorted([str(i) for i in self.groups[group]]))
+        return '\n'.join(sorted([str(i) for i in self.groups[group].values()]))
+
+    def get_ecu(self, group_key, ecu_key):
+        """Load data from db to given ecu and teturn it."""
+        return self.groups[group_key][ecu_key].load_data(self.ecu_db)
